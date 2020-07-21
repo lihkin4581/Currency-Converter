@@ -1,2 +1,2 @@
 # Currency-Converter
-Currency cinverter using Jquery
+Currency converter using Jquery
