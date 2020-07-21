@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+
+
+    <title>Currency Converter</title>
+    <style>
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        
+        select:hover,
+        input:hover {
+            cursor: pointer;
+            box-shadow: 0 0 5px rgba(81, 203, 238, 1);
+            /* make this whatever you want */
+        }
+        
+        body {
+            background: linear-gradient(120deg, #f0cd66 60%, #cabc3e 60%);
+        }
+        
+        html {
+            height: 80%;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="navbar-brand ">
+            <div class="col-12">
+                <h2>Currency Converter</h2>
+            </div>
+        </div>
+    </nav>
+    <div class="container">
+        <div class="card" style="margin:50px; border-radius: 20px;">
+            <form style="margin:10px; padding-left:10%; ">
+                <div class="form-group" style="margin-top:20px;">
+                    <div class="row">
+                        <div class="col-5 d-inline">
+                            <label for="fromCurrency" style="margin-left: 140px;">FROM </label>
+                            <select class="col-12 form-control disabled" autofocus="autofocus" id="fromCurrency">
+                        </select>
+                        </div>
+                        <div class="col-5 d-inline">
+                            <label for="toCurrency" style="margin-left: 140px;">TO </label>
+                            <select class="col-12 form-control disabled" id="toCurrency">
+                        </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group" style="margin-top:20px;">
+                    <div class="row">
+                        <div class="col-5 d-inline">
+                            <input id="fromCurrencyValue" type="number" class="form-control" value="1">
+                        </div>
+                        <div class="col-5 d-inline">
+                            <p id="toCurrencyValue" class="form-control btn-outline-secondary disabled"></p>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <div class="offset-3" id="unitValue"></div>
+                </div>
+                <!-- <div class="form-group">
+                    <button class="col-4 offset-3 form-control btn btn-outline-info" type="button" onclick="convertCurrencyValue();">Convert</button>
+                </div> -->
+                <div class="form-group">
+                    <span class="help-block btn-outline-secondary disabled"><i class="fas fa-star"></i> For conversion, either change the type of currency or enter the currency value to be converted.</span>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script>
+        // var xhttp = new XMLHttpRequest();
+        // xhttp.onreadystatechange = function() {
+        // if (this.readyState == 4 && this.status == 200) {
+        //     var response = JSON.parse(xhttp.responseText);
+        //     console.log(response);
+        // }
+        //     response = JSON.stringify(response);
+        //     document.getElementById('test').innerHTML = "<p>" + response + "</p>";
+        // };
+
+        // xhttp.open("GET", "test.json", true);
+        // xhttp.send();
+        // console.log("test")
+        $(document).ready(function() {
+
+            var selectFromCurrency = $("#fromCurrency"); //variable to populate the currency list 
+            var selectToCurrency = $("#toCurrency"); //variable to populate the currency list 
+
+            $.getJSON('currency.json', function(data) {
+                // console.log(data)
+
+                selectFromCurrency.html('');
+                selectToCurrency.html('');
+
+                //populate the select option for currency selection
+                for (var i = 0; i < data['results'].length; i++) {
+                    selectFromCurrency.append('<option value="' + data['results'][i]['id'] + '" id="' + data['results'][i]['id'] + '">' + data['results'][i]['currencyName'] + ' - ' + data['results'][i]['currencySymbol'] + '</option>');
+                    selectToCurrency.append('<option value="' + data['results'][i]['id'] + '" id="' + data['results'][i]['id'] + '">' + data['results'][i]['currencyName'] + ' - ' + data['results'][i]['currencySymbol'] + '</option>');
+                }
+
+            });
+
+            $("#fromCurrencyValue").keyup(function() {
+                convertCurrencyValue();
+            });
+
+            $("#fromCurrency").change(function() {
+                convertCurrencyValue();
+            });
+
+            $("#toCurrency").change(function() {
+                convertCurrencyValue();
+            });
+        });
+
+        //function for converting the given currency value
+        function convertCurrencyValue() {
+            $("#toCurrencyValue").addClass('btn-outline-secondary');
+            $("#toCurrencyValue").addClass('btn-outline-success');
+
+            var convertFromCurrency = document.getElementById("fromCurrency").value; //variable to store the from currency 
+            var convertToCurrency = document.getElementById("toCurrency").value; //variable to store the from currency 
+
+            // console.log(convertToCurrency);
+
+            //fetch the data from the api 
+            var request = new XMLHttpRequest();
+            var url = "https://free.currconv.com/api/v7/convert?apiKey=(add your api key here)=" + convertFromCurrency + "_" + convertToCurrency + "&compact=y";
+            request.open("GET", url, true);
+            request.send();
+            request.onreadystatechange = function() {
+                if (request.readyState == 4 && request.status == 200) { //check the response and ready state of the api
+                    var result = request.responseText;
+                    var c = convertFromCurrency + "_" + convertToCurrency;
+
+                    // console.log(c);
+                    // console.log(result);
+
+                    strResult = JSON.parse(result); //convert json to js object
+
+                    var fromValue = document.getElementById("fromCurrencyValue").value; //variable to store the conversion value
+
+                    // console.log(fromValue);
+                    // console.log(strResult[c].val);
+
+                    finalResult = fromValue * strResult[c].val; //calculate the final result
+
+                    // console.log(finalResult);
+                    document.getElementById("unitValue").innerHTML = "<h4> 1 " + convertFromCurrency + " = " + strResult[c].val + " " + convertToCurrency + " </h4>"
+                    document.getElementById("toCurrencyValue").innerHTML = finalResult; //pass the final result to the page
+                }
+            }
+
+
+        }
+    </script>
+
+</body>
+
+</html>
